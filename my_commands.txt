@@ -1,0 +1,168 @@
+
+ryu-manager ryu.app.simple_switch_13
+sudo mn --controller=remote,ip=127.0.0.1 --mac --switch=ovsk,protocols=OpenFlow13 --topo=single,2
+
+sh ovs-vsctl show
+sh ovs-ofctl -O OpenFlow13 dump-flows s1
+
+================
+xterm h2
+ITGRecv -l /tmp/receiverr.log
+
+
+-t 15000   is test duration in milliseconds  (15 seconds)
+-a h2    target ip
+-c 100   packet size
+-C 10    packet per second (pps)
+-T UDP   Protocol - UDP/TCP/
+
+Poisson distribution
+-O mean Poisson distribution.
+-c pkt_size Constant (default: 512 bytes).
+-o mean Poisson distribution.
+
+h1 ITGSend -T TCP -a h2 -c 1000 -O 50 -t 5000
+h1 ITGSend -T TCP -a h2 -c 1000 -O 50 -o 100 -t 5000
+
+-O 50: Sets the mean of the Poisson distribution for inter-arrival times between packets to 50 milliseconds.
+ In the first command, there's no -o parameter specified, which means the packet size distribution might
+  be constant (default or specified elsewhere), whereas in the second command, the packet size follows a 
+  Poisson distribution with a mean of 100 bytes.
+
+cd /tmp
+ITGDec /tmp/receiverr.log
+
+================
+TCP
+iperf -s
+iperf -c 10.1.1.4 -i 10 -t 30
+iperf -c 10.1.1.4 -i 10 -b 10m -t 30
+iperf -c 10.1.1.4 -i 10 -P 10 -t 30
+
+UDP
+iperf -u -s 
+iperf -u -c 10.1.1.4 -b 10m -i 10 -t 30
+iperf -u -c 10.1.1.4 -b 10m -i 10 -P 10 -t 30
+
+-c means client mode.
+-i means reporting interval
+-t means test duration in seconds
+-b means bandwidth 10m means 10Mbps
+-P means parallel connections
+
+================
+
+ryu-manager --observe-links ~/flowmanager/flowmanager.py ryu.app.simple_switch_13
+http://localhost:8080/home/index.html
+
+=========
+
+iperf -c 10.0.0.2 -t 10 &
+iperf -c 10.0.0.3 -t 20 &
+iperf -c 10.0.0.4 -t 30 &
+
+============
+
+https://osrg.github.io/ryu-book/en/html/rest_qos.html#queue-setting
+https://github.com/CheHsuan/RYU-TrafficMonitorApp
+
+1.Run controller
+
+ryu-manager ryu.app.rest_conf_switch ryu.app.rest_qos qos_simple_switch_13.py
+
+2. run mininet command 
+ sudo mn --controller=remote,ip=127.0.0.1 --mac --switch=ovsk,protocols=OpenFlow13 --topo=single,4
+
+3.OpenFlow setting
+	sh ovs-vsctl set Bridge s1 protocols=OpenFlow13
+	sh ovs-vsctl set-manager ptcp:6632
+
+4.Set ovsdb_addr
+
+	sh curl -X PUT -d '"tcp:127.0.0.1:6632"' http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr
+  
+
+5.Define bandwidth of queue
+
+  3 queues -> high, medium, low 
+ sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"min_rate": "800000", "max_rate": "1000000"}, {"min_rate": "400000", "max_rate": "800000"}, {"max_rate": "400000"}]}' http://localhost:8080/qos/queue/0000000000000001
+
+  sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"max_rate": "300000"}, {"min_rate": "700000"}]}' http://localhost:8080/qos/queue/0000000000000001
+  [
+    {
+      "switch_id": "0000000000000001",
+      "command_result": {
+        "result": "success",
+        "details": {
+          "0": {
+            "config": {
+              "max-rate": "500000"
+            }
+          },
+          "1": {
+            "config": {
+              "min-rate": "800000"
+            }
+          }
+        }
+      }
+    }
+  ]
+
+install flow entry 
+    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.2", "nw_proto": "UDP", "tp_dst": "5001"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
+    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.3", "nw_proto": "UDP", "tp_dst": "5001"}, "actions":{"queue": "1"}}' http://localhost:8080/qos/rules/0000000000000001
+    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.4", "nw_proto": "UDP", "tp_dst": "5001"}, "actions":{"queue": "2"}}' http://localhost:8080/qos/rules/0000000000000001
+
+
+    [
+    {
+      "switch_id": "0000000000000001",
+      "command_result": [
+        {
+          "result": "success",
+          "details": "QoS added. : qos_id=1"
+        }
+      ]
+    }
+  ]
+
+  check contents of switch 
+  sh curl -X GET http://localhost:8080/qos/rules/0000000000000001
+  [
+    {
+      "switch_id": "0000000000000001",
+      "command_result": [
+        {
+          "qos": [
+            {
+              "priority": 1,
+              "dl_type": "IPv4",
+              "nw_proto": "UDP",
+              "tp_dst": 5002,
+              "qos_id": 1,
+              "nw_dst": "10.0.0.1",
+              "actions": [
+                {
+                  "queue": "1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+
+6.Now you can use iperf to produce traffic and monitor the bandwidth,for example
+
+	In node:h1
+		iperf -s -u -i 1 -p 5001
+      
+
+	In node:h2
+		iperf -c 10.0.0.1 -p 5001 -u -b 1M
+    iperf -c 10.0.0.1 -p 5002 -u -b 1M
+
+==============
+
