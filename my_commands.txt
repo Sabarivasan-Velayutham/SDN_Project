@@ -85,9 +85,10 @@ ryu-manager ryu.app.rest_conf_switch ryu.app.rest_qos qos_simple_switch_13.py
 5.Define bandwidth of queue
 
   3 queues -> high, medium, low 
- sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"min_rate": "800000", "max_rate": "1000000"}, {"min_rate": "400000", "max_rate": "800000"}, {"max_rate": "400000"}]}' http://localhost:8080/qos/queue/0000000000000001
+ sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"max_rate": "400000"}, {"min_rate": "400000", "max_rate": "800000"}, {"min_rate": "800000", "max_rate": "1000000"}]}' http://localhost:8080/qos/queue/0000000000000001
 
-  sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"max_rate": "300000"}, {"min_rate": "700000"}]}' http://localhost:8080/qos/queue/0000000000000001
+  sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"max_rate": "500000"}, {"min_rate": "800000"}]}' http://localhost:8080/qos/queue/0000000000000001
+  sh curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"min_rate": "800000"}, {"max_rate": "500000"}]}' http://localhost:8080/qos/queue/0000000000000001
   [
     {
       "switch_id": "0000000000000001",
@@ -110,9 +111,9 @@ ryu-manager ryu.app.rest_conf_switch ryu.app.rest_qos qos_simple_switch_13.py
   ]
 
 install flow entry 
-    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.2", "nw_proto": "UDP", "tp_dst": "5001"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
-    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.3", "nw_proto": "UDP", "tp_dst": "5001"}, "actions":{"queue": "1"}}' http://localhost:8080/qos/rules/0000000000000001
-    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.4", "nw_proto": "UDP", "tp_dst": "5001"}, "actions":{"queue": "2"}}' http://localhost:8080/qos/rules/0000000000000001
+    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5002"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
+    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5003"}, "actions":{"queue": "1"}}' http://localhost:8080/qos/rules/0000000000000001
+    sh curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5004"}, "actions":{"queue": "2"}}' http://localhost:8080/qos/rules/0000000000000001
 
 
     [
