@@ -158,11 +158,11 @@ install flow entry
 6.Now you can use iperf to produce traffic and monitor the bandwidth,for example
 
 	In node:h1
-		iperf -s -u -i 1 -p 5001
+		iperf -s -u -i 1 -p 5001 | tee server.txt
       
 
 	In node:h2
-		iperf -c 10.0.0.1 -p 5001 -u -b 1M
+		iperf -c 10.0.0.1 -p 5001 -u -b 1M | tee client.txt
     iperf -c 10.0.0.1 -p 5002 -u -b 1M
 
 ==============
