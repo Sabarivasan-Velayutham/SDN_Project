@@ -7,7 +7,7 @@ run_iperf_server() {
 
 # Function to run iperf client in xterm
 run_iperf_client() {
-    xterm -e "iperf -c 10.0.0.1 -p 5004 -u -b 900K"
+    xterm -e "iperf -c 10.0.0.1 -p 5004 -u -b 900K | tee s3.txt"
 }
 
 # Run iperf server in a separate xterm window
