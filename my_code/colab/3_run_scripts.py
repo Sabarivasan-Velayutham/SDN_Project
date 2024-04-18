@@ -3,8 +3,8 @@ import subprocess
 import os
 
 # read all the script files and save them to text files
-client_directory = "client"
-os.makedirs(client_directory, exist_ok=True)
+server_directory = "server"
+os.makedirs(server_directory, exist_ok=True)
 # Function to run a bash script
 def run_script(script_path):
     # Execute the script using subprocess.run()

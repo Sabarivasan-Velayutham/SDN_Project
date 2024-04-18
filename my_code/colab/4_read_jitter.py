@@ -9,6 +9,7 @@ def extract_jitter(folder_path, num_rows, num_cols):
     jitter_array = [[None for _ in range(num_cols)] for _ in range(num_rows)]
     
     # Define the regex pattern to match the jitter values
+    interval_pattern = re.compile(r"3\.0- 4\.0 sec") #3.0- 4.0 sec
     jitter_pattern = re.compile(r"(\d+\.\d+) ms")
     
     # Get a list of all files in the specified folder
@@ -29,19 +30,21 @@ def extract_jitter(folder_path, num_rows, num_cols):
             # Read the file to find the jitter value
             with fileinput.input(files=file_path) as f:
                 for line in f:
-                    match = jitter_pattern.search(line)
-                    if match:
-                        # Extracted jitter value in milliseconds
-                        extracted_value = float(match.group(1))
-                        
-                        # Store the extracted value in the 2D array
-                        jitter_array[row][col] = extracted_value
-                        
-                        # Break the loop as we found the first occurrence of jitter value
-                        break
-                else:
-                    # If no jitter value found, you can handle the case here (e.g., print a message)
-                    print(f"No jitter value found in file: {filename}")
+                    if interval_pattern.search(line):
+                        # Extract the jitter value using regex pattern
+                        match = jitter_pattern.search(line)
+                        if match:
+                            # Extracted jitter value in milliseconds
+                            extracted_value = float(match.group(1))
+                            
+                            # Store the extracted value in the 2D array
+                            jitter_array[row][col] = extracted_value
+                            
+                            # Break the loop as we found the first occurrence of jitter value
+                            break
+                    else:
+                        # If no jitter value found, you can handle the case here (e.g., print a message)
+                        print(f"No jitter value found in file: {filename}")
     
     # Return the 2D array containing jitter values
     return jitter_array
@@ -55,7 +58,7 @@ def save_to_csv(array, csv_file):
             writer.writerow(row)
 
 
-folder_path = 'client' 
+folder_path = 'server' 
 
 # Define the number of rows and columns in the 2D array
 num_rows = 5  

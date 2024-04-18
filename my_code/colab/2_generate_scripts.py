@@ -58,12 +58,12 @@ def generate_scripts(processed_data, bandwidth, output_directory):
 
 # Function to run iperf server in xterm
 run_iperf_server() {{
-    xterm -e "iperf -s -u -i 1 -p {port}"
+    xterm -e "iperf -s -u -i 1 -p {port} | tee server/s{i}{j}.txt"
 }}
 
 # Function to run iperf client in xterm
 run_iperf_client() {{
-    xterm -e "iperf -c 10.0.0.1 -p {port} -u -b {value} | tee client/s{i}{j}.txt"
+    xterm -e "iperf -c 10.0.0.1 -p {port} -u -b {value}"
 }}
 
 # Run iperf server in a separate xterm window
