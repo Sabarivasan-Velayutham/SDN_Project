@@ -21,6 +21,11 @@ sudo curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": 
 
 echo "Installing flow entries for UDP traffic..."
 sleep 1
-sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5002"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
-sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5003"}, "actions":{"queue": "1"}}' http://localhost:8080/qos/rules/0000000000000001
-sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5004"}, "actions":{"queue": "2"}}' http://localhost:8080/qos/rules/0000000000000001
+sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5002"}, "actions": {"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
+sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5003"}, "actions": {"queue": "1"}}' http://localhost:8080/qos/rules/0000000000000001
+sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5004"}, "actions": {"queue": "2"}}' http://localhost:8080/qos/rules/0000000000000001
+
+
+echo "Check contents of Switch..."
+sleep 1
+sudo curl -X GET http://localhost:8080/qos/rules/0000000000000001
