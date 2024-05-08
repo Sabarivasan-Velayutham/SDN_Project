@@ -17,10 +17,10 @@ sudo curl -X PUT -d '"tcp:127.0.0.1:6632"' http://localhost:8080/v1.0/conf/switc
 
 echo "Defining bandwidth queues for port s1-eth1..."
 sleep 1
-sudo curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"max_rate": "40000"}, {"min_rate": "40000", "max_rate": "400000"}, {"min_rate": "400000", "max_rate": "1000000"}]}' http://localhost:8080/qos/queue/0000000000000001
+sudo curl -X POST -d '{"port_name": "s1-eth1", "type": "linux-htb", "max_rate": "1000000", "queues": [{"max_rate": "50000"}]}' http://localhost:8080/qos/queue/0000000000000001
 
 echo "Installing flow entries for UDP traffic..."
 sleep 1
 sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5002"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
-sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5003"}, "actions":{"queue": "1"}}' http://localhost:8080/qos/rules/0000000000000001
-sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.1", "nw_proto": "UDP", "tp_dst": "5004"}, "actions":{"queue": "2"}}' http://localhost:8080/qos/rules/0000000000000001
+sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.2", "nw_proto": "UDP", "tp_dst": "5002"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001
+sudo curl -X POST -d '{"match": {"nw_dst": "10.0.0.3", "nw_proto": "UDP", "tp_dst": "5002"}, "actions":{"queue": "0"}}' http://localhost:8080/qos/rules/0000000000000001

@@ -1,9 +1,9 @@
 import os
 
-arr = [i for i in range(10, 500, 10)]
+arr = [i for i in range(10, 70, 10)]
 
 data = [
-    [i for i in range(10, 500, 10)],
+    [i for i in range(10, 70, 10)],
 ]
 bandwidth = [
     ['L' for _ in range(len(arr))],
